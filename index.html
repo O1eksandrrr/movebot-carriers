@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Реєстрація перевізника</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #F5F7FA;
+      padding: 24px;
+      color: #2C3E50;
+    }
+    h2 {
+      color: #007AFF;
+    }
+    .block {
+      margin-top: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #E0E0E0;
+    }
+    label {
+      font-weight: 500;
+      margin-bottom: 6px;
+      display: block;
+    }
+    input, textarea, select {
+      padding: 12px;
+      font-size: 15px;
+      border: 1px solid #CCD1D9;
+      border-radius: 8px;
+      background-color: #fff;
+      width: 100%;
+      box-sizing: border-box;
+      margin-bottom: 16px;
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+    }
+    .row > div {
+      flex: 1;
+    }
+    button {
+      padding: 14px;
+      background-color: #007AFF;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h2>🚚 Реєстрація перевізника</h2>
+  <form id="carrierForm">
+    <div class="block">
+      <h3>🚛 Дані авто</h3>
+
+      <label>Модель</label>
+      <input type="text" id="model" placeholder="Sprinter" required />
+
+      <label>Рік випуску</label>
+      <input type="date" id="year" required />
+
+      <label>Вантажність (т)</label>
+      <input type="text" id="capacity" placeholder="Наприклад, 2" required />
+
+      <label>Обʼєм кузова (м³)</label>
+      <input type="text" id="volume" placeholder="Наприклад, 12" required />
+
+      <label>Внутрішні габарити кузова (Д×Ш×В, м)</label>
+      <div class="row">
+        <div><input type="text" id="length" placeholder="Довжина" /></div>
+        <div><input type="text" id="width" placeholder="Ширина" /></div>
+        <div><input type="text" id="height" placeholder="Висота" /></div>
+      </div>
+
+      <label>Місто базування</label>
+      <input type="text" id="city" placeholder="Наприклад, Львів" required />
+    </div>
+
+    <div class="block">
+      <h3>👤 Дані перевізника</h3>
+
+      <label>ПІБ перевізника</label>
+      <input type="text" id="owner_name" placeholder="Петренко Іван Іванович" required />
+
+      <label>ПІБ водія</label>
+      <input type="text" id="driver_name" placeholder="Петренко Іван" required />
+
+      <label>Форма реєстрації</label>
+      <select id="registration_type" onchange="toggleRegistrationFields()" required>
+        <option value="">Оберіть форму</option>
+        <option value="fop">ФОП</option>
+        <option value="llc">ТОВ</option>
+        <option value="none">Не зареєстрований</option>
+      </select>
+
+      <div id="registrationDetails" style="display: none;">
+        <label id="regLabel"></label>
+        <input type="text" id="reg_name" placeholder="" />
+        <label>Код ЄДРПОУ</label>
+        <input type="text" id="edrpou" placeholder="8 цифр" />
+      </div>
+
+      <label>Контактний номер телефону</label>
+      <input type="tel" id="phone" placeholder="380XXXXXXXXX" required />
+
+      <label>Коментар</label>
+      <textarea id="comment" placeholder="Додаткова інформація..."></textarea>
+    </div>
+
+    <button type="submit">✅ Надіслати</button>
+  </form>
+
+  <script>
+    function toggleRegistrationFields() {
+      const type = document.getElementById('registration_type').value;
+      const block = document.getElementById('registrationDetails');
+      const label = document.getElementById('regLabel');
+      const input = document.getElementById('reg_name');
+
+      if (type === 'fop') {
+        block.style.display = 'block';
+        label.textContent = 'ФОП';
+        input.placeholder = 'Прізвище Імʼя По батькові';
+      } else if (type === 'llc') {
+        block.style.display = 'block';
+        label.textContent = 'ТОВ';
+        input.placeholder = 'Назва компанії';
+      } else {
+        block.style.display = 'none';
+      }
+    }
+
+    const form = document.getElementById('carrierForm');
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const data = {
+        model: form.model.value,
+        year: form.year.value,
+        capacity: form.capacity.value,
+        volume: form.volume.value,
+        length: form.length.value,
+        width: form.width.value,
+        height: form.height.value,
+        city: form.city.value,
+        owner_name: form.owner_name.value,
+        driver_name: form.driver_name.value,
+        registration_type: form.registration_type.value,
+        reg_name: form.reg_name?.value || '',
+        edrpou: form.edrpou?.value || '',
+        phone: form.phone.value,
+        comment: form.comment.value
+      };
+
+      try {
+        await fetch("https://your-n8n-webhook-url", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        alert("Дякуємо! Дані надіслано.");
+      } catch (err) {
+        alert("Помилка відправки! Спробуйте пізніше.");
+      }
+    });
+  </script>
+</body>
+</html>
