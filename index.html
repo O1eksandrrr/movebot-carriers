@@ -43,6 +43,19 @@
     .row > div {
       flex: 1;
     }
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .checkbox-group label {
+      display: flex;
+      align-items: center;
+    }
+    .checkbox-group input[type="checkbox"] {
+      margin-right: 10px;
+    }
     button {
       padding: 14px;
       background-color: #007AFF;
@@ -61,6 +74,9 @@
   <form id="carrierForm">
     <div class="block">
       <h3>🚛 Дані авто</h3>
+
+      <label>Марка</label>
+      <input type="text" id="brand" placeholder="Mercedes" required />
 
       <label>Модель</label>
       <input type="text" id="model" placeholder="Sprinter" required />
@@ -83,6 +99,12 @@
 
       <label>Місто базування</label>
       <input type="text" id="city" placeholder="Наприклад, Львів" required />
+
+      <div class="checkbox-group">
+        <label><input type="checkbox" id="lift" /> Гідроборт</label>
+        <label><input type="checkbox" id="top_loading" /> Верхнє завантаження</label>
+        <label><input type="checkbox" id="side_loading" /> Бокове завантаження</label>
+      </div>
     </div>
 
     <div class="block">
@@ -143,6 +165,7 @@
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
       const data = {
+        brand: form.brand.value,
         model: form.model.value,
         year: form.year.value,
         capacity: form.capacity.value,
@@ -151,6 +174,9 @@
         width: form.width.value,
         height: form.height.value,
         city: form.city.value,
+        lift: form.lift.checked,
+        top_loading: form.top_loading.checked,
+        side_loading: form.side_loading.checked,
         owner_name: form.owner_name.value,
         driver_name: form.driver_name.value,
         registration_type: form.registration_type.value,
