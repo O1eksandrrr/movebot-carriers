@@ -7,17 +7,24 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    body {
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 24px;
       font-family: 'Inter', sans-serif;
       background-color: #F5F7FA;
-      padding: 24px;
       color: #2C3E50;
     }
     h2 {
       color: #007AFF;
+      margin-bottom: 24px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
     }
     .block {
-      margin-top: 24px;
       padding-bottom: 20px;
       border-bottom: 1px solid #E0E0E0;
     }
@@ -34,7 +41,7 @@
       background-color: #fff;
       width: 100%;
       box-sizing: border-box;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
     }
     .row {
       display: flex;
@@ -45,13 +52,19 @@
     }
     .checkbox-group {
       display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 10px;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 12px;
     }
     .checkbox-group label {
       display: flex;
       align-items: center;
+      padding: 10px 14px;
+      background-color: #fff;
+      border: 1px solid #CCD1D9;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
     }
     .checkbox-group input[type="checkbox"] {
       margin-right: 10px;
@@ -65,18 +78,17 @@
       font-size: 16px;
       font-weight: 500;
       cursor: pointer;
-      margin-top: 20px;
+      width: 100%;
     }
   </style>
 </head>
 <body>
   <h2>🚚 Реєстрація перевізника</h2>
-  <form id="carrierForm">
+  <form id="driverForm">
     <div class="block">
       <h3>🚛 Дані авто</h3>
-
       <label>Марка</label>
-      <input type="text" id="brand" placeholder="Mercedes" required />
+      <input type="text" id="brand" placeholder="Наприклад, Mercedes" required />
 
       <label>Модель</label>
       <input type="text" id="model" placeholder="Sprinter" required />
@@ -109,7 +121,6 @@
 
     <div class="block">
       <h3>👤 Дані перевізника</h3>
-
       <label>ПІБ перевізника</label>
       <input type="text" id="owner_name" placeholder="Петренко Іван Іванович" required />
 
@@ -124,9 +135,10 @@
         <option value="none">Не зареєстрований</option>
       </select>
 
-      <div id="registrationDetails" style="display: none;">
+      <div id="registrationDetails" style="display: none">
         <label id="regLabel"></label>
         <input type="text" id="reg_name" placeholder="" />
+
         <label>Код ЄДРПОУ</label>
         <input type="text" id="edrpou" placeholder="8 цифр" />
       </div>
@@ -161,7 +173,7 @@
       }
     }
 
-    const form = document.getElementById('carrierForm');
+    const form = document.getElementById('driverForm');
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
       const data = {
@@ -192,9 +204,9 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data)
         });
-        alert("Дякуємо! Дані надіслано.");
+        alert('Дякуємо! Дані надіслано.');
       } catch (err) {
-        alert("Помилка відправки! Спробуйте пізніше.");
+        alert('Помилка надсилання!');
       }
     });
   </script>
