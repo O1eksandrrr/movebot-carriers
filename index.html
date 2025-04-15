@@ -219,9 +219,20 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data)
         });
-        alert('Дякуємо! Дані надіслано.');
+        Telegram.WebApp.showPopup({
+          message: "✅ Дякуємо! Дані надіслано.",
+          buttons: [{ id: "ok", type: "default", text: "ОК" }]
+        });
+      
+        Telegram.WebApp.onEvent("popupClosed", function () {
+          Telegram.WebApp.close();
+        });
       } catch (err) {
-        alert('Помилка надсилання!');
+        Telegram.WebApp.showPopup({
+          message: "❌ Помилка під час надсилання. Спробуйте ще раз пізніше.",
+          buttons: [{ id: "close", type: "default", text: "ОК" }]
+        });
+}
       }
     });
   </script>
