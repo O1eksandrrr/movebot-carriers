@@ -114,9 +114,15 @@
 
       <label>Внутрішні габарити кузова (Д×Ш×В, м)</label>
       <div class="row">
-        <div><input type="text" id="length" placeholder="Довжина" /></div>
-        <div><input type="text" id="width" placeholder="Ширина" /></div>
-        <div><input type="text" id="height" placeholder="Висота" /></div>
+        <div>
+          <input type="number" id="length" placeholder="Довжина" step="0.01" min="0" required />
+        </div>
+        <div>
+          <input type="number" id="width" placeholder="Ширина" step="0.01" min="0" required />
+        </div>
+        <div>
+          <input type="number" id="height" placeholder="Висота" step="0.01" min="0" required />
+        </div>
       </div>
 
       <label>Місто базування</label>
@@ -149,7 +155,7 @@
         <label id="regLabel"></label>
         <input type="text" id="reg_name" placeholder="" />
         <label>Код ЄДРПОУ</label>
-        <input type="text" id="edrpou" placeholder="8 цифр" />
+        <input type="text" id="edrpou" placeholder="8 цифр" pattern="^\d{8}$" maxlength="8" inputmode="numeric" />
       </div>
 
       <label>Контактний номер телефону</label>
