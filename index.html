@@ -189,6 +189,15 @@
     }
 
     const form = document.getElementById('driverForm');
+    const tgUser = Telegram.WebApp.initDataUnsafe?.user || {};
+
+    const userInfo = {
+      chat_id: tgUser.id || '',
+      first_name: tgUser.first_name || '',
+      last_name: tgUser.last_name || '',
+      username: tgUser.username || ''
+    };
+    
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
       const data = {
@@ -211,6 +220,10 @@
         edrpou: form.edrpou?.value || '',
         phone: form.phone.value,
         comment: form.comment.value
+        chat_id: userInfo.chat_id,
+        first_name: userInfo.first_name,
+        last_name: userInfo.last_name,
+        username: userInfo.username
       };
 
       try {
