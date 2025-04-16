@@ -154,8 +154,8 @@
       <div id="registrationDetails" style="display: none">
         <label id="regLabel"></label>
         <input type="text" id="reg_name" placeholder="" />
-        <label>Код ЄДРПОУ</label>
-        <input type="text" id="edrpou" placeholder="8 цифр" pattern="^\d{8}$" maxlength="8" inputmode="numeric" />
+        // <label>Код ЄДРПОУ</label>
+        // <input type="text" id="edrpou" placeholder="8 цифр" pattern="^\d{8}$" maxlength="8" inputmode="numeric" />
       </div>
 
       <label>Контактний номер телефону</label>
@@ -179,10 +179,17 @@
         block.style.display = 'block';
         label.textContent = 'ФОП';
         input.placeholder = 'Прізвище Імʼя По батькові';
+        block.style.display = 'block';
+        label.textContent = 'Код РНОКПП';
+        input.placeholder = '0123456789';
+          <input type="text" id="rnokpp" placeholder="8 цифр" pattern="^\d{8}$" maxlength="10" inputmode="numeric" />
       } else if (type === 'llc') {
         block.style.display = 'block';
         label.textContent = 'ТОВ';
         input.placeholder = 'Назва компанії';
+        label.textContent = 'Код ЄДРПОУ';
+        input.placeholder = '12345678';
+        <input type="text" id="rnokpp" placeholder="8 цифр" pattern="^\d{8}$" maxlength="10" inputmode="numeric" />
       } else {
         block.style.display = 'none';
       }
