@@ -190,14 +190,13 @@
 
     const form = document.getElementById('driverForm');
     const tgUser = Telegram.WebApp.initDataUnsafe?.user || {};
-    const registrationDate = new Date().toISOString();
-
     const userInfo = {
       chat_id: tgUser.id || '',
       first_name: tgUser.first_name || '',
       last_name: tgUser.last_name || '',
       username: tgUser.username || ''
     };
+    const registrationDate = new Date().toISOString();
     
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
