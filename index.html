@@ -155,7 +155,7 @@
         <label id="regLabel"></label>
         <input type="text" id="reg_name" placeholder="" />
         <label>Код ЄДРПОУ / РНОКПП </label>
-        <input type="text" id="edrpou" placeholder="8 цифр для ТОВ, 10 цифр для ФОП" pattern="^\d{8}$" maxlength="10" inputmode="numeric" />
+        <input type="text" id="edrpou" placeholder="8 цифр для ТОВ, 10 цифр для ФОП" pattern="^(\d{8}|\d{10})$" maxlength="10" inputmode="numeric" />
       </div>
 
       <label>Контактний номер телефону</label>
