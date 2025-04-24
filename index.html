@@ -85,6 +85,12 @@
       cursor: pointer;
       width: 100%;
     }
+    input.valid {
+      border: 2px solid #2ecc71 !important; /* Зелена рамка */
+    }
+    input.invalid {
+      border: 2px solid #e74c3c !important; /* Червона рамка, якщо потрібно */
+    }
   </style>
 </head>
 <body>
@@ -124,7 +130,6 @@
       <datalist id="city-list"></datalist>
       <input type="hidden" id="city_lat" />
       <input type="hidden" id="city_lng" />
-
 
       <div class="checkbox-group">
         <label><input type="checkbox" id="lift" /> Гідроборт</label>
@@ -185,53 +190,54 @@
       }
     }
 
-    // Автозаповнення міст через OSM
     const cityInput = document.getElementById('city');
     const cityList = document.getElementById('city-list');
     let citySuggestions = [];
     
-    cityInput.addEventListener('input', async function () {
+    let debounceTimer;
+    cityInput.addEventListener('input', function () {
       const query = this.value.trim();
-      if (query.length < 3) return;
+      clearTimeout(debounceTimer);
     
-      try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&accept-language=uk&countrycodes=ua&limit=5&q=${encodeURIComponent(query)}`);
-        const data = await res.json();
-        cityList.innerHTML = ''; // Очистити старі варіанти
-        citySuggestions = [];
+      if (query.length < 3) {
+        cityList.innerHTML = '';
+        cityInput.classList.remove('valid');
+        return;
+      }
     
-        data.forEach(place => {
-          if (place.type === 'city' || place.type === 'village' || place.type === 'town') {
+      debounceTimer = setTimeout(async () => {
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&accept-language=uk&countrycodes=ua&limit=5&q=${encodeURIComponent(query)}`);
+          const data = await res.json();
+    
+          cityList.innerHTML = '';
+          citySuggestions = [];
+    
+          data.forEach(place => {
             const name = place.display_name.split(',')[0];
             const option = document.createElement('option');
             option.value = name;
             cityList.appendChild(option);
             citySuggestions.push({ name, lat: place.lat, lon: place.lon });
-          }
-        });
-      } catch (error) {
-        console.error("OSM error:", error);
-      }
+          });
+        } catch (error) {
+          console.error("OSM error:", error);
+        }
+      }, 500); // 0.5s затримка після вводу
     });
-    
-    // Зберегти координати після вибору
+
     cityInput.addEventListener('change', function () {
       const match = citySuggestions.find(city => city.name === this.value);
       if (match) {
         document.getElementById('city_lat').value = match.lat;
         document.getElementById('city_lng').value = match.lon;
+        cityInput.classList.add('valid');
+        cityInput.classList.remove('invalid');
+      } else {
+        cityInput.classList.remove('valid');
+        cityInput.classList.add('invalid');
       }
     });
-
-    const form = document.getElementById('driverForm');
-    const tgUser = Telegram.WebApp.initDataUnsafe?.user || {};
-    const userInfo = {
-      chat_id: tgUser.id || '',
-      first_name: tgUser.first_name || '',
-      last_name: tgUser.last_name || '',
-      username: tgUser.username || ''
-    };
-    const registrationDate = new Date().toISOString();
 
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
