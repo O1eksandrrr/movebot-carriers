@@ -214,11 +214,22 @@
           citySuggestions = [];
     
           data.forEach(place => {
-            const name = place.display_name.split(',')[0];
+            const { display_name, address } = place;
+            const city = address.city || address.town || address.village || display_name.split(',')[0];
+            const region = address.state || address.region || '';
+            const fullName = `${city}, ${region}`;
+          
             const option = document.createElement('option');
-            option.value = name;
+            option.value = fullName;
             cityList.appendChild(option);
-            citySuggestions.push({ name, lat: place.lat, lon: place.lon });
+          
+            citySuggestions.push({
+              name: fullName,
+              city: city,
+              region: region,
+              lat: place.lat,
+              lon: place.lon
+            });
           });
         } catch (error) {
           console.error("OSM error:", error);
