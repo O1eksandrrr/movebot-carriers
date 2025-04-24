@@ -185,21 +185,41 @@
       }
     }
 
-    // Автоматичне визначення координат і нормалізація назви міста
-    document.getElementById('city').addEventListener('blur', async function () {
-      const query = this.value;
-      if (!query) return;
+    // Автозаповнення міст через OSM
+    const cityInput = document.getElementById('city');
+    const cityList = document.getElementById('city-list');
+    let citySuggestions = [];
+    
+    cityInput.addEventListener('input', async function () {
+      const query = this.value.trim();
+      if (query.length < 3) return;
+    
       try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`);
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&accept-language=uk&countrycodes=ua&limit=5&q=${encodeURIComponent(query)}`);
         const data = await res.json();
-        if (data.length > 0) {
-          const place = data[0];
-          this.value = place.display_name.split(',')[0];
-          document.getElementById('city_lat').value = place.lat;
-          document.getElementById('city_lng').value = place.lon;
-        }
-      } catch (err) {
-        console.error("Помилка при зверненні до OSM:", err);
+        cityList.innerHTML = ''; // Очистити старі варіанти
+        citySuggestions = [];
+    
+        data.forEach(place => {
+          if (place.type === 'city' || place.type === 'village' || place.type === 'town') {
+            const name = place.display_name.split(',')[0];
+            const option = document.createElement('option');
+            option.value = name;
+            cityList.appendChild(option);
+            citySuggestions.push({ name, lat: place.lat, lon: place.lon });
+          }
+        });
+      } catch (error) {
+        console.error("OSM error:", error);
+      }
+    });
+    
+    // Зберегти координати після вибору
+    cityInput.addEventListener('change', function () {
+      const match = citySuggestions.find(city => city.name === this.value);
+      if (match) {
+        document.getElementById('city_lat').value = match.lat;
+        document.getElementById('city_lng').value = match.lon;
       }
     });
 
