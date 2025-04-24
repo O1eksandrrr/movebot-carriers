@@ -120,9 +120,11 @@
       </div>
 
       <label>Місто базування</label>
-      <input type="text" id="city" placeholder="Наприклад, Львів" required />
+      <input type="text" id="city" list="city-list" placeholder="Наприклад, Львів" required />
+      <datalist id="city-list"></datalist>
       <input type="hidden" id="city_lat" />
       <input type="hidden" id="city_lng" />
+
 
       <div class="checkbox-group">
         <label><input type="checkbox" id="lift" /> Гідроборт</label>
