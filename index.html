@@ -114,19 +114,15 @@
 
       <label>Внутрішні габарити кузова (Д×Ш×В, м)</label>
       <div class="row">
-        <div>
-          <input type="number" id="length" placeholder="Довжина" step="0.01" min="0" required />
-        </div>
-        <div>
-          <input type="number" id="width" placeholder="Ширина" step="0.01" min="0" required />
-        </div>
-        <div>
-          <input type="number" id="height" placeholder="Висота" step="0.01" min="0" required />
-        </div>
+        <div><input type="number" id="length" placeholder="Довжина" step="0.01" min="0" required /></div>
+        <div><input type="number" id="width" placeholder="Ширина" step="0.01" min="0" required /></div>
+        <div><input type="number" id="height" placeholder="Висота" step="0.01" min="0" required /></div>
       </div>
 
       <label>Місто базування</label>
       <input type="text" id="city" placeholder="Наприклад, Львів" required />
+      <input type="hidden" id="city_lat" />
+      <input type="hidden" id="city_lng" />
 
       <div class="checkbox-group">
         <label><input type="checkbox" id="lift" /> Гідроборт</label>
@@ -154,8 +150,8 @@
       <div id="registrationDetails" style="display: none">
         <label id="regLabel"></label>
         <input type="text" id="reg_name" placeholder="" />
-        <label>Код ЄДРПОУ / РНОКПП </label>
-        <input type="text" id="edrpou" placeholder="8 цифр для ТОВ, 10 цифр для ФОП" pattern="^(\d{8}|\d{10})$" maxlength="10" inputmode="numeric" />
+        <label>Код ЄДРПОУ / РНОКПП</label>
+        <input type="text" id="edrpou" placeholder="8 або 10 цифр" pattern="^(\d{8}|\d{10})$" maxlength="10" inputmode="numeric" />
       </div>
 
       <label>Контактний номер телефону</label>
@@ -174,12 +170,10 @@
       const block = document.getElementById('registrationDetails');
       const label = document.getElementById('regLabel');
       const input = document.getElementById('reg_name');
-
       if (type === 'fop') {
         block.style.display = 'block';
         label.textContent = 'ФОП';
         input.placeholder = 'Прізвище Імʼя По батькові';
-        block.style.display = 'block';
       } else if (type === 'llc') {
         block.style.display = 'block';
         label.textContent = 'ТОВ';
@@ -188,6 +182,24 @@
         block.style.display = 'none';
       }
     }
+
+    // Автоматичне визначення координат і нормалізація назви міста
+    document.getElementById('city').addEventListener('blur', async function () {
+      const query = this.value;
+      if (!query) return;
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+        if (data.length > 0) {
+          const place = data[0];
+          this.value = place.display_name.split(',')[0];
+          document.getElementById('city_lat').value = place.lat;
+          document.getElementById('city_lng').value = place.lon;
+        }
+      } catch (err) {
+        console.error("Помилка при зверненні до OSM:", err);
+      }
+    });
 
     const form = document.getElementById('driverForm');
     const tgUser = Telegram.WebApp.initDataUnsafe?.user || {};
@@ -198,7 +210,7 @@
       username: tgUser.username || ''
     };
     const registrationDate = new Date().toISOString();
-    
+
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
       const data = {
@@ -211,6 +223,8 @@
         width: form.width.value,
         height: form.height.value,
         city: form.city.value,
+        city_lat: document.getElementById('city_lat').value,
+        city_lng: document.getElementById('city_lng').value,
         lift: form.lift.checked,
         top_loading: form.top_loading.checked,
         side_loading: form.side_loading.checked,
@@ -238,7 +252,6 @@
           message: "✅ Дякуємо! Дані надіслано.",
           buttons: [{ id: "ok", type: "default", text: "ОК" }]
         });
-      
         Telegram.WebApp.onEvent("popupClosed", function () {
           Telegram.WebApp.close();
         });
