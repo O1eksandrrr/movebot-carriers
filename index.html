@@ -104,6 +104,10 @@
       <label>Модель</label>
       <input type="text" id="model" placeholder="Sprinter" required />
 
+      <label>Номерний знак</label>
+      <input type="text" id="plates" placeholder="АВ9695АВ" pattern="^(\d{8}$" maxlength="8" required />
+
+
       <label>Рік випуску</label>
       <input type="number" id="year" placeholder="2020" min="1900" max="2099" required />
 
@@ -255,6 +259,7 @@
       const data = {
         brand: form.brand.value,
         model: form.model.value,
+        plates: form.plates.value,
         year: form.year.value,
         capacity: form.capacity.value,
         volume: form.volume.value,
