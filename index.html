@@ -86,10 +86,10 @@
       width: 100%;
     }
     input.valid {
-      border: 2px solid #2ecc71 !important; /* Зелена рамка */
+      border: 2px solid #2ecc71 !important;
     }
     input.invalid {
-      border: 2px solid #e74c3c !important; /* Червона рамка, якщо потрібно */
+      border: 2px solid #e74c3c !important;
     }
   </style>
 </head>
@@ -100,17 +100,12 @@
       <h3>🚛 Дані авто</h3>
       <label>Марка</label>
       <input type="text" id="brand" placeholder="Наприклад, Mercedes" required />
-
       <label>Модель</label>
       <input type="text" id="model" placeholder="Sprinter" required />
-
       <label>Номерний знак</label>
-      <input type="text" id="plates" placeholder="АВ9695АВ" pattern="^(\d{8}$" maxlength="8" required />
-
-
+      <input type="text" id="plates" placeholder="АВ9695АВ" pattern="^[А-ЯA-Z0-9]{8}$" maxlength="8" required />
       <label>Рік випуску</label>
       <input type="number" id="year" placeholder="2020" min="1900" max="2099" required />
-
       <div class="row">
         <div>
           <label>Вантажність (т)</label>
@@ -121,35 +116,29 @@
           <input type="number" step="0.1" min="0" id="volume" placeholder="Наприклад, 12" required />
         </div>
       </div>
-
       <label>Внутрішні габарити кузова (Д×Ш×В, м)</label>
       <div class="row">
         <div><input type="number" id="length" placeholder="Довжина" step="0.01" min="0" required /></div>
         <div><input type="number" id="width" placeholder="Ширина" step="0.01" min="0" required /></div>
         <div><input type="number" id="height" placeholder="Висота" step="0.01" min="0" required /></div>
       </div>
-
       <label>Місто базування</label>
       <input type="text" id="city" list="city-list" placeholder="Наприклад, Львів" required />
       <datalist id="city-list"></datalist>
       <input type="hidden" id="city_lat" />
       <input type="hidden" id="city_lng" />
-
       <div class="checkbox-group">
         <label><input type="checkbox" id="lift" /> Гідроборт</label>
         <label><input type="checkbox" id="top_loading" /> Верхнє завантаження</label>
         <label><input type="checkbox" id="side_loading" /> Бокове завантаження</label>
       </div>
     </div>
-
     <div class="block">
       <h3>👤 Дані перевізника</h3>
       <label>ПІБ перевізника</label>
       <input type="text" id="owner_name" placeholder="Петренко Іван Іванович" required />
-
       <label>ПІБ водія</label>
       <input type="text" id="driver_name" placeholder="Петренко Іван" required />
-
       <label>Форма реєстрації</label>
       <select id="registration_type" onchange="toggleRegistrationFields()" required>
         <option value="">Оберіть форму</option>
@@ -157,25 +146,24 @@
         <option value="llc">ТОВ</option>
         <option value="none">Не зареєстрований</option>
       </select>
-
       <div id="registrationDetails" style="display: none">
         <label id="regLabel"></label>
         <input type="text" id="reg_name" placeholder="" />
         <label>Код ЄДРПОУ / РНОКПП</label>
         <input type="text" id="edrpou" placeholder="8 або 10 цифр" pattern="^(\d{8}|\d{10})$" maxlength="10" inputmode="numeric" />
       </div>
-
       <label>Контактний номер телефону</label>
       <input type="tel" id="phone" placeholder="380XXXXXXXXX" required />
-
       <label>Коментар</label>
       <textarea id="comment" placeholder="Додаткова інформація..."></textarea>
     </div>
-
     <button type="submit">✅ Надіслати</button>
   </form>
-
   <script>
+    const form = document.getElementById('driverForm');
+    const userInfo = Telegram.WebApp.initDataUnsafe?.user || {};
+    const registrationDate = new Date().toISOString();
+
     function toggleRegistrationFields() {
       const type = document.getElementById('registration_type').value;
       const block = document.getElementById('registrationDetails');
@@ -197,48 +185,36 @@
     const cityInput = document.getElementById('city');
     const cityList = document.getElementById('city-list');
     let citySuggestions = [];
-    
     let debounceTimer;
+
     cityInput.addEventListener('input', function () {
       const query = this.value.trim();
       clearTimeout(debounceTimer);
-    
       if (query.length < 3) {
         cityList.innerHTML = '';
         cityInput.classList.remove('valid');
         return;
       }
-    
       debounceTimer = setTimeout(async () => {
         try {
           const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&accept-language=uk&countrycodes=ua&limit=5&q=${encodeURIComponent(query)}`);
           const data = await res.json();
-    
           cityList.innerHTML = '';
           citySuggestions = [];
-    
           data.forEach(place => {
             const { display_name, address } = place;
             const city = address.city || address.town || address.village || display_name.split(',')[0];
             const region = address.state || address.region || '';
             const fullName = `${city}, ${region}`;
-          
             const option = document.createElement('option');
             option.value = fullName;
             cityList.appendChild(option);
-          
-            citySuggestions.push({
-              name: fullName,
-              city: city,
-              region: region,
-              lat: place.lat,
-              lon: place.lon
-            });
+            citySuggestions.push({ name: fullName, city: city, region: region, lat: place.lat, lon: place.lon });
           });
         } catch (error) {
           console.error("OSM error:", error);
         }
-      }, 500); // 0.5s затримка після вводу
+      }, 500);
     });
 
     cityInput.addEventListener('change', function () {
@@ -279,7 +255,7 @@
         edrpou: form.edrpou?.value || '',
         phone: form.phone.value,
         comment: form.comment.value,
-        chat_id: userInfo.chat_id,
+        chat_id: userInfo.id,
         first_name: userInfo.first_name,
         last_name: userInfo.last_name,
         username: userInfo.username,
@@ -287,6 +263,7 @@
       };
 
       try {
+        console.log("Sending data:", data);
         await fetch("https://firstbs.app.n8n.cloud/webhook/9202bdb6-cec6-45b0-a0a4-76a17c6cc79c", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -300,6 +277,7 @@
           Telegram.WebApp.close();
         });
       } catch (err) {
+        console.error("Submit error:", err);
         Telegram.WebApp.showPopup({
           message: "❌ Помилка під час надсилання. Спробуйте ще раз пізніше.",
           buttons: [{ id: "close", type: "default", text: "ОК" }]
