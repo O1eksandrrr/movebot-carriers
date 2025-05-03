@@ -209,13 +209,15 @@
     const citySuggestionsBox = document.getElementById('city-suggestions');
     let citySuggestions = [];
     let debounceTimer;
+    let validCitySelected = false;
 
     cityInput.addEventListener('input', function () {
+      validCitySelected = false;
       const query = this.value.trim();
       clearTimeout(debounceTimer);
       if (query.length < 3) {
         citySuggestionsBox.style.display = 'none';
-        cityInput.classList.remove('valid');
+        cityInput.classList.remove('valid', 'invalid');
         return;
       }
       debounceTimer = setTimeout(async () => {
@@ -240,6 +242,7 @@
               cityInput.classList.add('valid');
               cityInput.classList.remove('invalid');
               citySuggestionsBox.style.display = 'none';
+              validCitySelected = true;
             });
             citySuggestionsBox.appendChild(div);
             citySuggestions.push({ name: fullName, lat: place.lat, lon: place.lon });
@@ -257,6 +260,13 @@
 
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
+
+      if (!validCitySelected) {
+        cityInput.classList.add('invalid');
+        cityInput.focus();
+        return;
+      }
+
       const data = {
         brand: form.brand.value,
         model: form.model.value,
@@ -311,3 +321,4 @@
   </script>
 </body>
 </html>
+
