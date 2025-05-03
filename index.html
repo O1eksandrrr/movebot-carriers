@@ -91,6 +91,27 @@
     input.invalid {
       border: 2px solid #e74c3c !important;
     }
+    .suggestion-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      z-index: 999;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      max-height: 250px;
+      overflow-y: auto;
+    }
+    .suggestion-item {
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .suggestion-item:hover {
+      background-color: #f0f0f0;
+    }
   </style>
 </head>
 <body>
@@ -123,8 +144,10 @@
         <div><input type="number" id="height" placeholder="Висота" step="0.01" min="0" required /></div>
       </div>
       <label>Місто базування</label>
-      <input type="text" id="city" list="city-list" placeholder="Наприклад, Львів" required />
-      <datalist id="city-list"></datalist>
+      <div style="position: relative;">
+        <input type="text" id="city" placeholder="Наприклад, Львів" required autocomplete="off" />
+        <div id="city-suggestions" class="suggestion-list" style="display: none;"></div>
+      </div>
       <input type="hidden" id="city_lat" />
       <input type="hidden" id="city_lng" />
       <div class="checkbox-group">
@@ -172,7 +195,7 @@
       if (type === 'fop') {
         block.style.display = 'block';
         label.textContent = 'ФОП';
-        input.placeholder = 'Прізвище Імʼя По батькові';
+        input.placeholder = "Прізвище Імʼя По батькові";
       } else if (type === 'llc') {
         block.style.display = 'block';
         label.textContent = 'ТОВ';
@@ -183,7 +206,7 @@
     }
 
     const cityInput = document.getElementById('city');
-    const cityList = document.getElementById('city-list');
+    const citySuggestionsBox = document.getElementById('city-suggestions');
     let citySuggestions = [];
     let debounceTimer;
 
@@ -191,7 +214,7 @@
       const query = this.value.trim();
       clearTimeout(debounceTimer);
       if (query.length < 3) {
-        cityList.innerHTML = '';
+        citySuggestionsBox.style.display = 'none';
         cityInput.classList.remove('valid');
         return;
       }
@@ -199,37 +222,38 @@
         try {
           const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&accept-language=uk&countrycodes=ua&limit=5&q=${encodeURIComponent(query)}`);
           const data = await res.json();
-          cityList.innerHTML = '';
+          citySuggestionsBox.innerHTML = '';
           citySuggestions = [];
           data.forEach(place => {
-            const { display_name, address } = place;
-            const city = address.city || address.town || address.village || display_name.split(',')[0];
+            const { address } = place;
+            const city = address.city || address.town || address.village || '';
             const region = address.state || address.region || '';
             const country = address.country || '';
             const fullName = [city, region, country].filter(Boolean).join(', ');
-            const option = document.createElement('option');
-            option.value = fullName;
-            cityList.appendChild(option);
-            citySuggestions.push({ name: fullName, city: city, region: region, lat: place.lat, lon: place.lon });
+            const div = document.createElement('div');
+            div.className = 'suggestion-item';
+            div.textContent = fullName;
+            div.addEventListener('mousedown', () => {
+              cityInput.value = fullName;
+              document.getElementById('city_lat').value = place.lat;
+              document.getElementById('city_lng').value = place.lon;
+              cityInput.classList.add('valid');
+              cityInput.classList.remove('invalid');
+              citySuggestionsBox.style.display = 'none';
+            });
+            citySuggestionsBox.appendChild(div);
+            citySuggestions.push({ name: fullName, lat: place.lat, lon: place.lon });
           });
+          citySuggestionsBox.style.display = 'block';
         } catch (error) {
           console.error("OSM error:", error);
         }
       }, 500);
     });
 
-    cityInput.addEventListener('change', function () {
-      const match = citySuggestions.find(city => city.name === this.value);
-      if (match) {
-        document.getElementById('city_lat').value = match.lat;
-        document.getElementById('city_lng').value = match.lon;
-        cityInput.classList.add('valid');
-        cityInput.classList.remove('invalid');
-      } else {
-        cityInput.classList.remove('valid');
-        cityInput.classList.add('invalid');
-      }
-    });
+    cityInput.addEventListener('blur', () => setTimeout(() => {
+      citySuggestionsBox.style.display = 'none';
+    }, 200));
 
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
@@ -264,7 +288,6 @@
       };
 
       try {
-        console.log("Sending data:", data);
         await fetch("https://firstbs.app.n8n.cloud/webhook/9202bdb6-cec6-45b0-a0a4-76a17c6cc79c", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
