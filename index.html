@@ -205,7 +205,8 @@
             const { display_name, address } = place;
             const city = address.city || address.town || address.village || display_name.split(',')[0];
             const region = address.state || address.region || '';
-            const fullName = `${city}, ${region}`;
+            const country = address.country || '';
+            const fullName = [city, region, country].filter(Boolean).join(', ');
             const option = document.createElement('option');
             option.value = fullName;
             cityList.appendChild(option);
